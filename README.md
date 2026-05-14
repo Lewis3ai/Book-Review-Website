@@ -1,7 +1,4 @@
-# REMEMBER
-ask co pilot to run flask, pip install
-and to run app and open browser do:        
-python3 -m App.main
+# Book Review Website
 
 
 # Flask Starter Template fo REPLit
