@@ -37,6 +37,16 @@ Password: bobpass
 
 ---
 
+## Book Review Website Screenshots
+![Alt Text](book-review-loginpage.png)
+![Alt Text](book-review-homepage.png)
+![Alt Text](book-review-postreview.png)
+![Alt Text](book-review-reviewshown.png)
+![Alt Text](book-review-searchfeature.png)
+
+
+---
+
 ## Tech Stack
 
 | Layer       | Technology                        |
