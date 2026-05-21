@@ -6,7 +6,6 @@ A full-stack book review web application built with Python/Flask. Users can brow
 
 ## Table of Contents
 
-- [Frontend quick Login](#frontend quick login)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
@@ -19,7 +18,7 @@ A full-stack book review web application built with Python/Flask. Users can brow
 
 ---
 
-##Frontend quick Login
+## Frontend quick Login
 Username: bob
 Password: bobpass
 
