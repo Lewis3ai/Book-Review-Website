@@ -1,95 +1,227 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-  
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-     <!--Import Google Icon Font-->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <!--Let browser know website is optimized for mobile-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Home</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookShelf — My Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body class="app-body">
 
-    <style>
-      *{
-        box-sizing: border-box;  
-      }
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-md app-navbar sticky-top">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand brand-link" href="{{ url_for('main.home') }}">
+        <span class="brand-icon">📚</span>
+        <span class="brand-name">BookShelf</span>
+      </a>
 
-      h1{
-        font-size : 1.5em;
-      }
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-      html{
-        height: 100vh;
-        width: 100vw;
-        margin:0;
-        padding:0;
-      }
-
-      body{
-        margin:0;
-        padding:0;
-        height: 100%;
-        width: 100%;
-      }
-
-    </style>
-
-  </head>
-  <body>
-    <nav class="purple">
-      <div class="nav-wrapper">
-        <a href="#" class="brand-logo">Home {{user.username}}</a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-          <li><a href="/logout">Logout</a></li>
-        </ul>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <div class="mx-auto search-wrap">
+          <input
+            type="search"
+            id="bookSearch"
+            class="form-control search-input"
+            placeholder="Search by title, author, or ISBN…"
+            autocomplete="off"
+          />
+        </div>
+        <div class="d-flex align-items-center gap-3 ms-3">
+          <span class="nav-username">👤 {{ user.username }}</span>
+          <a href="{{ url_for('main.logout') }}" class="btn btn-outline-light btn-sm">Sign Out</a>
+        </div>
       </div>
-    </nav>
-
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <nav class="white black-text" style="padding: 10px">
-      <div class="nav-wrapper">
-          <ul class="flashes">
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-          </ul>
-      </div>
-    </nav>
-    {% endif %}
-    {% endwith %}
-
-    <div class="row">
-
-      <section class="col s12 m9" style="margin-top: 5px; overflow-y:scroll; height: 86vh">
-      
-      </section>
-
-      <section class="col s12 m3">
-
-          <p>
-            <!-- if a book was selected  -->
-            {% if book %}
-              <!-- display book details and review form -->
-
-                
-            {% else %}
-              <!-- if no book was selected, default state-->
-              <h1>Select a Book to view/add reviews</h1>
-            {% endif %}
-          </p>
-
-          <div class="row" style="height: 44vh; overflow-y: scroll">
-              
-          </div>
-      
-      </section>
-
     </div>
+  </nav>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script> M.AutoInit(); </script>
-  </body>
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container container-fluid px-4 pt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else ('success' if category == 'success' else 'info') }} alert-dismissible fade show mb-2" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Page header -->
+  <div class="page-header container-fluid px-4 py-4">
+    <h1 class="page-title">Browse Books</h1>
+    <p class="page-sub text-muted">{{ books|length }} books in the collection. Click any book to read or write a review.</p>
+  </div>
+
+  <!-- Book grid -->
+  <div class="container-fluid px-4 pb-5">
+    {% if books %}
+      <div class="book-grid" id="bookGrid">
+        {% for book in books %}
+          <div
+            class="book-card"
+            data-search="{{ (book.title ~ ' ' ~ book.author ~ ' ' ~ book.isbn)|lower }}"
+            data-isbn="{{ book.isbn }}"
+            data-bs-toggle="modal"
+            data-bs-target="#bookModal"
+            data-title="{{ book.title }}"
+            data-author="{{ book.author }}"
+            data-year="{{ book.publication_year or '' }}"
+            data-publisher="{{ book.publisher or '' }}"
+            data-image="{{ book.image or '' }}"
+            data-isbn-val="{{ book.isbn }}"
+            data-avg="{{ book.avg_rating or '' }}"
+            data-count="{{ book.review_count }}"
+            role="button"
+            tabindex="0"
+          >
+            <div class="book-cover-wrap">
+              {% if book.image %}
+                <img
+                  src="{{ book.image }}"
+                  alt="{{ book.title }} cover"
+                  class="book-cover"
+                  loading="lazy"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                />
+              {% endif %}
+              <div class="book-cover-placeholder" style="{{ 'display:none' if book.image else '' }}">
+                <span class="placeholder-initial">{{ book.title[0] }}</span>
+              </div>
+            </div>
+            <div class="book-info">
+              <h3 class="book-title">{{ book.title }}</h3>
+              <p class="book-author">{{ book.author }}</p>
+              <div class="book-meta">
+                {% if book.avg_rating %}
+                  <span class="stars-display" aria-label="{{ book.avg_rating }} out of 5">
+                    {% for i in range(1, 6) %}
+                      <span class="star {{ 'filled' if i <= book.avg_rating|round|int else ('half' if (book.avg_rating - i + 1) >= 0.5 else '') }}">★</span>
+                    {% endfor %}
+                  </span>
+                  <span class="rating-val">{{ book.avg_rating }}</span>
+                {% else %}
+                  <span class="no-rating">No ratings yet</span>
+                {% endif %}
+                <span class="review-count">{{ book.review_count }} review{{ 's' if book.review_count != 1 else '' }}</span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div id="noResults" class="no-results d-none">
+        <span class="no-results-icon">🔍</span>
+        <p>No books matched your search.</p>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-icon">📖</span>
+        <h2>No books yet</h2>
+        <p>Run <code>flask init</code> to populate the library.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Book Detail Modal -->
+  <div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="bookModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body pt-0">
+
+          <!-- Book detail header -->
+          <div class="modal-book-header d-flex gap-4">
+            <div class="modal-cover-wrap flex-shrink-0">
+              <img id="modalImage" src="" alt="" class="modal-cover" />
+              <div id="modalPlaceholder" class="modal-cover-placeholder d-none">
+                <span id="modalInitial"></span>
+              </div>
+            </div>
+            <div class="modal-book-info">
+              <h2 id="modalTitle" class="modal-title-text"></h2>
+              <p id="modalAuthor" class="modal-author"></p>
+              <p id="modalMeta" class="modal-meta text-muted small"></p>
+              <div id="modalRating" class="modal-rating"></div>
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <!-- Write a review -->
+          <div class="review-form-section">
+            <h5 class="section-title">Write a Review</h5>
+            <form id="reviewForm" method="POST" novalidate>
+              <div class="mb-3">
+                <label class="form-label fw-medium">Your Rating</label>
+                <div class="star-rating-input" id="starInput" role="group" aria-label="Rating">
+                  {% for i in range(1, 6) %}
+                    <span class="star-btn" data-value="{{ i }}" role="radio" aria-checked="false" tabindex="0" aria-label="{{ i }} star{{ 's' if i != 1 else '' }}">★</span>
+                  {% endfor %}
+                </div>
+                <input type="hidden" name="rating" id="ratingInput" value="" />
+                <div id="ratingError" class="form-text text-danger d-none">Please select a rating.</div>
+              </div>
+              <div class="mb-3">
+                <label for="reviewText" class="form-label fw-medium">Your Review</label>
+                <textarea
+                  id="reviewText"
+                  name="text"
+                  class="form-control"
+                  rows="4"
+                  maxlength="2000"
+                  placeholder="What did you think of this book?"
+                ></textarea>
+                <div class="d-flex justify-content-between mt-1">
+                  <div id="textError" class="form-text text-danger d-none">Please write a review.</div>
+                  <div class="form-text text-muted ms-auto"><span id="charCount">0</span>/2000</div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-brand">Post Review</button>
+            </form>
+          </div>
+
+          <!-- Existing reviews -->
+          <div class="reviews-section mt-4" id="reviewsSection">
+            <h5 class="section-title">Reviews</h5>
+            <div id="reviewsList"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews data injected for JS -->
+  <script id="reviewsData" type="application/json">
+    {
+      {% for book in books %}
+      "{{ book.isbn }}": [
+        {% for review in book.reviews %}
+        {
+          "username": {{ review.user.username | tojson }},
+          "rating": {{ review.rating }},
+          "text": {{ review.text | tojson }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ]{% if not loop.last %},{% endif %}
+      {% endfor %}
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
 </html>
+
+

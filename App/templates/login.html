@@ -1,99 +1,109 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookShelf — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body class="auth-body">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-     <!--Import Google Icon Font-->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <!--Let browser know website is optimized for mobile-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Login</title>
+  <div class="auth-wrapper">
 
-    <style>
-      *{
-        box-sizing: border-box;  
-      }
-
-      html{
-        height: 100vh;
-        width: 100vw;
-        margin:0;
-        padding:0;
-      }
-
-      body{
-        margin:0;
-        padding:0;
-        height: 100%;
-        width: 100%;
-      }
-
-    </style>
-
-  </head>
-  <body>
-    <nav class="purple">
-      <div class="nav-wrapper">
-        <a href="#" class="brand-logo">Login</a>
-      </div>
-    </nav>
-
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <nav class="white black-text" style="padding: 10px">
-      <div class="nav-wrapper">
-          <ul class="flashes">
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-          </ul>
-      </div>
-    </nav>
-    {% endif %}
-    {% endwith %}
-
-    <div class="row">
-
-      <section class="col s12" style="margin-top: 5px; overflow-y:scroll; height: 90vh">
-        <div class="row">
-          <!-- login form -->
-          <div class="col s12 m6 l4 offset-m3 offset-l4">
-            <div class="card">
-              <div class="card-content">
-                <span class="card-title">Login</span>
-
-                <form action="/login" method="POST">
-                  <div class="input-field">
-                    <input name="username" type="text" class="validate">
-                    <label for="username">Username</label>
-                  </div>
-
-                  <div class="input-field">
-                    <input id="password" name="password" type="password" class="validate">
-                    <label for="password">Password</label>
-                  </div>
-
-                  <div class="row">
-                    <div class="input-field col s4 right">
-                      <button class="btn waves-effect waves-light" type="submit">
-                         Login
-                      </button>
-                    </div>  
-                  </div>
-                </form>
-                
-              </div>
-            </div>
-          </div>
-          
+    <!-- Left panel -->
+    <div class="auth-panel-left d-none d-lg-flex">
+      <div class="auth-panel-content">
+        <div class="auth-logo mb-4">
+          <span class="logo-icon">📚</span>
+          <span class="logo-text">BookShelf</span>
         </div>
-      </section>
-
+        <h2 class="auth-tagline">Your personal reading universe.</h2>
+        <p class="auth-sub">Discover great books, track your reading, and share reviews with fellow book lovers.</p>
+        <div class="auth-stats mt-5">
+          <div class="stat-item">
+            <span class="stat-number">99+</span>
+            <span class="stat-label">Books</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">∞</span>
+            <span class="stat-label">Reviews</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">5★</span>
+            <span class="stat-label">Ratings</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script> M.AutoInit(); </script>
-  </body>
+    <!-- Right panel -->
+    <div class="auth-panel-right">
+      <div class="auth-form-wrap">
+
+        <div class="d-lg-none text-center mb-4">
+          <span class="logo-icon">📚</span>
+          <span class="logo-text ms-2">BookShelf</span>
+        </div>
+
+        <h1 class="auth-form-title">Welcome back</h1>
+        <p class="auth-form-sub">Sign in to continue to your library.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'danger' if category == 'error' else ('success' if category == 'success' else 'info') }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('main.login_action') }}" method="POST" novalidate>
+          <div class="mb-3">
+            <label for="username" class="form-label fw-medium">Username</label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              class="form-control form-control-lg"
+              placeholder="Enter your username"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label fw-medium">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              class="form-control form-control-lg"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg w-100 btn-brand">
+            Sign In
+          </button>
+        </form>
+
+        <p class="mt-4 text-center text-muted small">
+          Don't have an account? Contact your administrator.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
+
